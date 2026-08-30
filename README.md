@@ -37,10 +37,10 @@ PostgreSQL sidecar and wires its admin account and public address into StartOS. 
 Two subcontainers make up this package, both unmodified upstream images run with their own
 entrypoints (`sdk.useEntrypoint()`) — this package adds no custom scripts or Dockerfile.
 
-| Subcontainer | Image                       | Purpose                                     |
-| ------------ | ---------------------------- | -------------------------------------------- |
-| `postgres`   | Official `postgres` image    | Database backing Miniflux's feeds, entries, and accounts |
-| `miniflux`   | Official `miniflux/miniflux` image | The Miniflux application itself       |
+| Subcontainer | Image                              | Purpose                                                  |
+| ------------ | ---------------------------------- | -------------------------------------------------------- |
+| `postgres`   | Official `postgres` image          | Database backing Miniflux's feeds, entries, and accounts |
+| `miniflux`   | Official `miniflux/miniflux` image | The Miniflux application itself                          |
 
 Architectures: x86_64, aarch64. `postgres` binds to `127.0.0.1` only and is never exposed via any
 interface — `miniflux` reaches it over loopback, since both subcontainers share this package's
@@ -50,10 +50,10 @@ network namespace.
 
 A single volume, `main`, holds everything this package persists:
 
-| Mount point (inside `postgres`)  | Subpath on `main` | Contents                          |
-| --------------------------------- | ------------------ | ---------------------------------- |
-| `/var/lib/postgresql`             | `postgresql`        | PostgreSQL data directory          |
-| (not mounted into a container)    | `store.json`         | This package's own StartOS state   |
+| Mount point (inside `postgres`) | Subpath on `main` | Contents                         |
+| ------------------------------- | ----------------- | -------------------------------- |
+| `/var/lib/postgresql`           | `postgresql`      | PostgreSQL data directory        |
+| (not mounted into a container)  | `store.json`      | This package's own StartOS state |
 
 The `miniflux` subcontainer mounts nothing — Miniflux keeps no state outside its database.
 
@@ -80,9 +80,9 @@ None. PostgreSQL runs as an in-package sidecar, not a StartOS-level dependency.
 
 ## Network Access and Interfaces
 
-| Interface id | Type | Port (internal) | Protocol | Purpose               |
-| ------------ | ---- | ---------------- | -------- | ---------------------- |
-| `ui`         | `ui` | 8080              | http     | The Miniflux web app and its REST API (same origin, no separate API interface) |
+| Interface id | Type | Port (internal) | Protocol | Purpose                                                                        |
+| ------------ | ---- | --------------- | -------- | ------------------------------------------------------------------------------ |
+| `ui`         | `ui` | 8080            | http     | The Miniflux web app and its REST API (same origin, no separate API interface) |
 
 ## Installation and First-Run Flow
 
@@ -115,8 +115,9 @@ Primary URL**.
 
 - **Retrieve your admin login credentials** — raised on install and stays until **Set Admin
   Password** is run at least once (tracked by `store.json`'s `adminPasswordSeen` flag).
-  Severity: `critical`. It does not block the service from starting — Miniflux boots fine with
-  its auto-generated credentials — but the user cannot sign in until they know them.
+  Severity: `important`, deliberately not `critical` — the action that clears it requires
+  Miniflux to be running (it calls the app's own API), so a `critical` task here would block
+  the service from ever starting and lock the user out of clearing it.
 - **Primary URL is no longer available. Select a new one.** — raised if the previously-selected
   primary URL (an interface address) disappears, e.g. a LAN address changes. Severity: `critical`.
   Clears when **Set Primary URL** is run with a currently-available address.
@@ -175,7 +176,7 @@ actions:
   - set-admin-password
   - set-primary-url
 tasks:
-  - { action: set-admin-password, severity: critical }
+  - { action: set-admin-password, severity: important }
   - { action: set-primary-url, severity: critical }
 health_checks:
   - postgres
