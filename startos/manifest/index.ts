@@ -6,9 +6,6 @@ export const manifest = setupManifest({
   title: 'Miniflux',
   // Matches upstream's Dockerfile OCI labels (org.opencontainers.image.licenses).
   license: 'Apache-2.0',
-  // TODO: confirm/create this repo before publishing — following the Jolls/<name>-startos
-  // convention used by this author's other packages (enshu-startos, navidrome-startos), but
-  // https://github.com/Jolls/miniflux-startos did not exist as of packaging time.
   packageRepo: 'https://github.com/Jolls/miniflux-startos',
   upstreamRepo: 'https://github.com/miniflux/v2',
   marketingUrl: 'https://miniflux.app',
