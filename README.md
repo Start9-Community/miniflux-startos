@@ -96,6 +96,12 @@ The primary URL defaults to whichever of the service's own non-local addresses l
 `.local` address, chosen automatically on install; the user can change it later with **Set
 Primary URL**.
 
+`INTEGRATION_ALLOW_PRIVATE_NETWORKS=1` is always set — upstream defaults this off as SSRF
+hardening, but every third-party integration target reachable from a StartOS install (Karakeep,
+Wallabag, etc.) is itself on a private/LAN address, and Miniflux's client otherwise refuses those
+silently (no error surfaced in the integrations UI, the "Save" button on an entry just does
+nothing).
+
 ## Actions
 
 - **Set Admin Password** (`set-admin-password`) — Run this once after install to retrieve your

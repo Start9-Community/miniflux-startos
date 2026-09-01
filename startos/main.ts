@@ -95,6 +95,14 @@ export const main = sdk.setupMain(async ({ effects }) => {
           ADMIN_USERNAME: adminUsername,
           ADMIN_PASSWORD: adminPassword,
           LISTEN_ADDR: `0.0.0.0:${uiPort}`,
+          // Every third-party integration target reachable from a StartOS
+          // install (Karakeep, Wallabag, etc.) sits on a LAN/private address
+          // by nature — Miniflux's integration HTTP client refuses those by
+          // default (SSRF hardening aimed at public internet-facing installs)
+          // and the failure is silent in the UI. Safe to allow broadly here:
+          // integrations are opt-in per-service credentials the user enters
+          // themselves, not attacker-controlled input.
+          INTEGRATION_ALLOW_PRIVATE_NETWORKS: '1',
           BASE_URL: domain || 'http://localhost',
         },
       },
