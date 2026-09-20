@@ -44,7 +44,8 @@ entrypoints (`sdk.useEntrypoint()`) — this package adds no custom scripts or D
 
 Architectures: x86_64, aarch64. `postgres` binds to `127.0.0.1` only and is never exposed via any
 interface — `miniflux` reaches it over loopback, since both subcontainers share this package's
-network namespace.
+network namespace. A third step, the `admin-password` oneshot, runs `psql` in the `postgres`
+subcontainer after Miniflux is healthy on every start.
 
 ## Volume and Data Layout
 
@@ -60,19 +61,19 @@ The `miniflux` subcontainer mounts nothing — Miniflux keeps no state outside i
 ## File Models
 
 - **`store.json`** (on `main`, StartOS-side state, never read by Miniflux itself): holds the
-  generated PostgreSQL password, the generated admin username/password, whether the user has
-  retrieved that password yet, and the chosen primary URL. Seeded once on install
-  (`init/seedFiles.ts`); the admin password field is rewritten only by the **Set Admin Password**
-  action, and the primary-URL field only by the **Set Primary URL** action or the install-time
-  default-selection logic. A hand edit to this file is not read back by anything but this
-  package's own `main.ts` on its next reactive run, and will be overwritten the next time the
-  corresponding action runs.
+  generated PostgreSQL password, the admin username and password, and the chosen primary URL.
+  The Postgres password is seeded once on install (`init/seedFiles.ts`); the admin password is
+  written only by **Set Admin Password**, and the primary-URL field only by **Set Primary URL** or
+  the install-time default-selection logic. The admin password is re-asserted on every start (see
+  below), so a hand edit to it takes effect on the next start; the other keys are read back by
+  `main.ts` on its next reactive run and overwritten the next time the corresponding action runs.
 - Miniflux itself owns no on-disk config file — every setting this package manages is delivered
   by environment variable (`DATABASE_URL`, `RUN_MIGRATIONS`, `CREATE_ADMIN`, `ADMIN_USERNAME`,
-  `ADMIN_PASSWORD`, `LISTEN_ADDR`, `BASE_URL`), re-asserted on every daemon start from the current
-  contents of `store.json`. `CREATE_ADMIN` in particular only ever creates the admin account
-  once — Miniflux silently skips it if the username already exists — so it never overwrites a
-  password rotated after install.
+  `ADMIN_PASSWORD`, `LISTEN_ADDR`, `INTEGRATION_ALLOW_PRIVATE_NETWORKS`, `BASE_URL`), re-asserted
+  on every daemon start from the current contents of `store.json`. `CREATE_ADMIN` only creates
+  the admin account when it is missing, so `ADMIN_PASSWORD` alone would apply on the first start
+  and never again; the `admin-password` oneshot writes the store's password into Miniflux's
+  `users` table after every start, which is what makes the store authoritative.
 
 ## Dependencies
 
@@ -86,11 +87,10 @@ None. PostgreSQL runs as an in-package sidecar, not a StartOS-level dependency.
 
 ## Installation and First-Run Flow
 
-On install, `init/seedFiles.ts` generates the PostgreSQL password and a random admin password
-(username `admin`) before the daemon ever starts — Miniflux needs `CREATE_ADMIN` populated with
-real credentials on its very first boot, so this can't wait on user interaction. The user never
-sees this password until they run **Set Admin Password** (see Tasks below), and running it also
-rotates it to a fresh value, so the credential nobody has seen is never the one that ships.
+On install, `init/seedFiles.ts` generates the PostgreSQL password, and `init/watchAdminPassword.ts`
+raises a critical task pointing at **Set Admin Password**, so the service cannot start until the
+user has run it and holds the password. The first start then creates the admin account
+(username `admin`) with that password through Miniflux's `CREATE_ADMIN`.
 
 The primary URL defaults to whichever of the service's own non-local addresses looks like a
 `.local` address, chosen automatically on install; the user can change it later with **Set
@@ -104,29 +104,30 @@ nothing).
 
 ## Actions
 
-- **Set Admin Password** (`set-admin-password`) — Run this once after install to retrieve your
-  login. It always generates a brand-new password and applies it through Miniflux's own REST API
-  (`PUT /v1/users/{id}`, authenticated with the password currently on record), then returns the
-  username and new password. Takes a few seconds; requires Miniflux to be running, since the
-  application has no offline way to change an existing user's password. Safe to run repeatedly —
-  each run invalidates the previous password. If the admin password was ever changed from inside
-  Miniflux itself (rather than through this action), this action can no longer authenticate and
-  will report a failure — in that case, use Miniflux's own account-recovery options.
+- **Set Admin Password** (`set-admin-password`) — Run it once after install, and again whenever
+  the password should change or has been forgotten. It generates a fresh password, stores it, and
+  returns the username and password; nothing is applied by the action itself. On a running
+  service the store change restarts the daemons, and the `admin-password` oneshot writes the
+  bcrypt hash of the stored password into the `users` row (via `psql` in the `postgres`
+  subcontainer, using pgcrypto's `crypt(…, gen_salt('bf'))`, the same `$2a$` format Miniflux
+  writes) — so the new password works within a few seconds; on a stopped service it applies at
+  the next start. Safe to run repeatedly — each run invalidates the previous password. A
+  confirmation warning appears once a password exists.
 - **Set Primary URL** (`set-primary-url`) — Pick which of the service's reachable addresses
   Miniflux uses for `BASE_URL`. This affects links stamped into feed entries, WebSub callback
   URLs, and OAuth2 redirect URLs — pick the address readers of those links will actually use.
-  Takes effect on the next daemon restart; instant and idempotent.
+  The daemon restarts on the change; instant and idempotent.
 
 ## Tasks
 
-- **Retrieve your admin login credentials** — raised on install and stays until **Set Admin
-  Password** is run at least once (tracked by `store.json`'s `adminPasswordSeen` flag).
-  Severity: `important`, deliberately not `critical` — the action that clears it requires
-  Miniflux to be running (it calls the app's own API), so a `critical` task here would block
-  the service from ever starting and lock the user out of clearing it.
+- **Set the admin password before signing in to Miniflux** — raised on install and whenever
+  `store.json` has no admin password. Severity: `critical` — the service does not start until
+  **Set Admin Password** has been run once. It cannot return on its own; only removing the
+  password from `store.json` by hand would raise it again.
 - **Primary URL is no longer available. Select a new one.** — raised if the previously-selected
-  primary URL (an interface address) disappears, e.g. a LAN address changes. Severity: `critical`.
-  Clears when **Set Primary URL** is run with a currently-available address.
+  primary URL (an interface address) disappears. Severity: `critical`. Clears when **Set Primary
+  URL** is run with a currently-available address. Expect it after a restore from backup: the
+  interface's assigned port changes with the reinstall, so the stored URL no longer matches.
 
 ## Health Checks
 
@@ -141,18 +142,18 @@ nothing).
 Strategy: whole-volume snapshot (`sdk.Backups.ofVolumes('main')`). StartOS always stops the
 service (including the `postgres` sidecar) before backing up, so the PostgreSQL data directory is
 copied in a consistent, cold state — this is a plain filesystem backup of Postgres's own files,
-not a `pg_dump`. A restored instance comes back with its database, generated credentials, and
-primary-URL choice intact; nothing needs to be re-entered.
+not a `pg_dump`. A restored instance comes back stopped with its database and credentials intact. Its
+interface is assigned a new port on reinstall, so the stored primary URL no longer matches and
+the **Primary URL is no longer available** task holds the service until **Set Primary URL** is
+run again.
 
 ## Limitations and Differences
 
 1. Only the built-in local-account authentication is wired up. Miniflux's OAuth2/OIDC and
    reverse-proxy authentication options are present in the environment-variable surface upstream
-   documents, but this package does not expose them as StartOS actions — set them by hand via a
-   future package update if needed.
-2. The admin password can only be rotated while Miniflux is running, since rotation goes through
-   its own REST API rather than a config file or CLI flag (Miniflux's `-reset-password` CLI
-   command requires an interactive terminal and cannot be scripted).
+   documents, but this package does not expose them as StartOS actions.
+2. The admin password is owned by StartOS: a password changed from inside Miniflux is overwritten
+   with the stored one on the next start. Change it with **Set Admin Password** instead.
 
 ---
 
@@ -174,6 +175,7 @@ startos_managed_env_vars:
   - ADMIN_USERNAME
   - ADMIN_PASSWORD
   - LISTEN_ADDR
+  - INTEGRATION_ALLOW_PRIVATE_NETWORKS
   - BASE_URL
 dependencies: none
 interfaces:
@@ -182,7 +184,7 @@ actions:
   - set-admin-password
   - set-primary-url
 tasks:
-  - { action: set-admin-password, severity: important }
+  - { action: set-admin-password, severity: critical }
   - { action: set-primary-url, severity: critical }
 health_checks:
   - postgres

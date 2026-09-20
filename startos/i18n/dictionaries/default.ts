@@ -12,7 +12,7 @@ const dict = {
   'The Miniflux feed reader and admin UI': 6,
   // actions/setAdminPassword.ts
   'Set Admin Password': 7,
-  'View your Miniflux admin login, or generate a new password to replace the current one.': 8,
+  'Generate a new password for the Miniflux admin account. Replaces the current one.': 8,
   'Login Credentials': 9,
   'Use these credentials to sign in.': 10,
   Username: 11,
@@ -24,7 +24,9 @@ const dict = {
   // init/taskSetPrimaryUrl.ts
   'Primary URL is no longer available. Select a new one.': 16,
   // init/watchAdminPassword.ts
-  'Retrieve your admin login credentials': 17,
+  'Set the admin password before signing in to Miniflux': 17,
+  // actions/setAdminPassword.ts
+  'Replaces the current admin password.': 18,
 } as const
 
 /**

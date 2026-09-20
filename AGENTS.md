@@ -31,13 +31,12 @@ verified, tried, and decided belongs in the commit message and the PR body.
 
 ## This repo
 
-- Admin-password rotation (`startos/actions/setAdminPassword.ts`) talks to Miniflux's own REST
-  API over loopback rather than exec'ing a CLI: Miniflux's `-reset-password` flag requires a real
-  interactive terminal (checked with `term.IsTerminal`), which a scripted `exec` can't satisfy,
-  and `CREATE_ADMIN` silently no-ops once the username already exists. If a future upstream
-  release adds a non-interactive password-reset path, prefer it over the API call.
-- The `miniflux` and `postgres` subcontainers share this package's loopback network namespace
-  (same pattern as `enshu-startos` and `arx-startos`) — `main.ts` and the admin-password action
-  both reach each other over `127.0.0.1`, never a bridge address.
-- See `UPDATING.md` before bumping the upstream image tag — the admin-password action depends on
-  two specific Miniflux API routes that a release could change.
+- **The admin password is applied by the `admin-password` oneshot in `main.ts`, not by the
+  action.** Miniflux's `CREATE_ADMIN` only creates a missing account, its `-reset-password` needs
+  an interactive terminal, and its REST API needs the current password — so the store's password
+  is written into the `users` table (pgcrypto bcrypt, via `psql` in the `postgres` subcontainer)
+  after Miniflux is healthy on every start. Keep the action a store write; don't route rotation
+  through the API.
+- The `miniflux` and `postgres` subcontainers share this package's loopback network namespace —
+  `main.ts` reaches Postgres over `127.0.0.1`, never a bridge address.
+- See `UPDATING.md` before bumping the upstream image tag.
