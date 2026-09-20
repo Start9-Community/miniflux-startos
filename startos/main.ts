@@ -3,6 +3,8 @@ import { sdk } from './sdk'
 import { storeJson } from './fileModels/store.json'
 import { pgDatabase, pgPort, pgUser, uiPort } from './utils'
 
+const sqlString = (value: string) => `'${value.replace(/'/g, "''")}'`
+
 export const main = sdk.setupMain(async ({ effects }) => {
   console.info(i18n('Starting Miniflux!'))
 
@@ -124,7 +126,7 @@ export const main = sdk.setupMain(async ({ effects }) => {
             '-c',
             'CREATE EXTENSION IF NOT EXISTS pgcrypto',
             '-c',
-            `UPDATE users SET password = crypt('${adminPassword}', gen_salt('bf', 10)) WHERE username = '${adminUsername.replace(/'/g, "''")}'`,
+            `UPDATE users SET password = crypt(${sqlString(adminPassword)}, gen_salt('bf', 10)) WHERE username = ${sqlString(adminUsername)}`,
           ],
           env: { PGPASSWORD: pgPassword },
         },
