@@ -94,9 +94,10 @@ raises a critical task pointing at **Set Admin Password**, so the service cannot
 user has run it and holds the password. The first start then creates the admin account
 (username `admin`) with that password through Miniflux's `CREATE_ADMIN`.
 
-Whenever no primary URL is stored, as on install, `init/primaryUrl.ts` stores the `.local`
-address (or the first of the `ui` interface's addresses), so no task is raised for it; the user
-can change it later with **Set Primary URL**.
+Whenever no primary URL is stored, as on install, `init/primaryUrl.ts` stores the `ui`
+interface's preferred available address: a public domain (HTTPS first), then `.local`, then
+any remaining address. Once seeded, no primary-URL task is raised; the user can change the
+choice later with **Set Primary URL**.
 
 `INTEGRATION_ALLOW_PRIVATE_NETWORKS=1` is always set — upstream defaults this off as SSRF
 hardening, but every third-party integration target reachable from a StartOS install (Karakeep,
@@ -121,9 +122,10 @@ nothing).
   passkey (WebAuthn) relying-party id and origin from it, so passkeys work only at that address
   and must be registered again after a change. Built with `sdk.setupPrimaryUrl`
   (`startos/primaryUrl.ts`): the stored URL is followed to its hostname's current port and
-  scheme, and while that hostname is not one of the interface's addresses Miniflux is given the
-  `.local` address instead, without overwriting the choice. The daemon restarts on the change;
-  instant and idempotent.
+  scheme. While that hostname is not one of the interface's addresses, Miniflux uses the
+  preferred available address (the same ordering as on install), without overwriting the
+  choice. If no address is available, the stored URL remains in use. The daemon restarts on
+  the change; instant and idempotent.
 
 ## Tasks
 
