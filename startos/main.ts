@@ -1,6 +1,7 @@
 import { i18n } from './i18n'
 import { sdk } from './sdk'
 import { storeJson } from './fileModels/store.json'
+import { primaryUrl } from './primaryUrl'
 import { pgDatabase, pgPort, pgUser, uiPort } from './utils'
 
 const sqlString = (value: string) => `'${value.replace(/'/g, "''")}'`
@@ -14,7 +15,8 @@ export const main = sdk.setupMain(async ({ effects }) => {
     (await storeJson.read((s) => s.adminUsername).const(effects)) ?? 'admin'
   const adminPassword =
     (await storeJson.read((s) => s.adminPassword).const(effects)) ?? ''
-  const domain = (await storeJson.read((s) => s.domain).const(effects)) ?? ''
+  const baseUrl =
+    (await primaryUrl.bestUsable(effects).const()) ?? 'http://localhost'
 
   const postgresSub = sdk.SubContainer.of(
     effects,
@@ -90,7 +92,7 @@ export const main = sdk.setupMain(async ({ effects }) => {
             // Integration targets on a StartOS box (Karakeep, Wallabag, …) are
             // private addresses, which Miniflux's SSRF guard refuses silently.
             INTEGRATION_ALLOW_PRIVATE_NETWORKS: '1',
-            BASE_URL: domain || 'http://localhost',
+            BASE_URL: baseUrl,
           },
         },
         ready: {

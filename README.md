@@ -63,8 +63,8 @@ The `miniflux` subcontainer mounts nothing — Miniflux keeps no state outside i
 - **`store.json`** (on `main`, StartOS-side state, never read by Miniflux itself): holds the
   generated PostgreSQL password, the admin username and password, and the chosen primary URL.
   The Postgres password is seeded once on install (`init/seedFiles.ts`); the admin password is
-  written only by **Set Admin Password**, and the primary-URL field only by **Set Primary URL** or
-  the install-time default-selection logic. The admin password is re-asserted on every start (see
+  written only by **Set Admin Password**, and the primary-URL field (`domain`) by **Set Primary
+  URL**, or by `init/primaryUrl.ts` whenever it is empty. The admin password is re-asserted on every start (see
   below), so a hand edit to it takes effect on the next start; the other keys are read back by
   `main.ts` on its next reactive run and overwritten the next time the corresponding action runs.
 - Miniflux itself owns no on-disk config file — every setting this package manages is delivered
@@ -85,6 +85,8 @@ None. PostgreSQL runs as an in-package sidecar, not a StartOS-level dependency.
 | ------------ | ---- | --------------- | -------- | ------------------------------------------------------------------------------ |
 | `ui`         | `ui` | 8080            | http     | The Miniflux web app and its REST API (same origin, no separate API interface) |
 
+The `ui` interface nominates the primary URL (below) as the address StartOS's **Open UI** opens.
+
 ## Installation and First-Run Flow
 
 On install, `init/seedFiles.ts` generates the PostgreSQL password, and `init/watchAdminPassword.ts`
@@ -92,9 +94,10 @@ raises a critical task pointing at **Set Admin Password**, so the service cannot
 user has run it and holds the password. The first start then creates the admin account
 (username `admin`) with that password through Miniflux's `CREATE_ADMIN`.
 
-The primary URL defaults to whichever of the service's own non-local addresses looks like a
-`.local` address, chosen automatically on install; the user can change it later with **Set
-Primary URL**.
+Whenever no primary URL is stored, as on install, `init/primaryUrl.ts` stores the `ui`
+interface's preferred available address: a public domain (HTTPS first), then `.local`, then
+any remaining address. Once seeded, no primary-URL task is raised; the user can change the
+choice later with **Set Primary URL**.
 
 `INTEGRATION_ALLOW_PRIVATE_NETWORKS=1` is always set — upstream defaults this off as SSRF
 hardening, but every third-party integration target reachable from a StartOS install (Karakeep,
@@ -113,10 +116,16 @@ nothing).
   writes) — so the new password works within a few seconds; on a stopped service it applies at
   the next start. Safe to run repeatedly — each run invalidates the previous password. A
   confirmation warning appears once a password exists.
-- **Set Primary URL** (`set-primary-url`) — Pick which of the service's reachable addresses
-  Miniflux uses for `BASE_URL`. This affects links stamped into feed entries, WebSub callback
-  URLs, and OAuth2 redirect URLs — pick the address readers of those links will actually use.
-  The daemon restarts on the change; instant and idempotent.
+- **Set Primary URL** (`set-primary-url`) — Pick which of the `ui` interface's addresses Miniflux
+  uses for `BASE_URL`. Upstream builds links back to itself from it (Telegram and ntfy
+  notification links, Google Reader API feed-icon and stream URLs, proxied media) and takes the
+  passkey (WebAuthn) relying-party id and origin from it, so passkeys work only at that address
+  and must be registered again after a change. Built with `sdk.setupPrimaryUrl`
+  (`startos/primaryUrl.ts`): the stored URL is followed to its hostname's current port and
+  scheme. While that hostname is not one of the interface's addresses, Miniflux uses the
+  preferred available address (the same ordering as on install), without overwriting the
+  choice. If no address is available, the stored URL remains in use. The daemon restarts on
+  the change; instant and idempotent.
 
 ## Tasks
 
@@ -124,10 +133,11 @@ nothing).
   `store.json` has no admin password. Severity: `critical` — the service does not start until
   **Set Admin Password** has been run once. It cannot return on its own; only removing the
   password from `store.json` by hand would raise it again.
-- **Primary URL is no longer available. Select a new one.** — raised if the previously-selected
-  primary URL (an interface address) disappears. Severity: `critical`. Clears when **Set Primary
-  URL** is run with a currently-available address. Expect it after a restore from backup: the
-  interface's assigned port changes with the reinstall, so the stored URL no longer matches.
+- **Primary URL is no longer available. Select a new one.** — raised while the stored primary
+  URL's hostname is not one of the `ui` interface's addresses. Severity: `critical`. Clears when
+  **Set Primary URL** is run with a current address, or when the stored hostname comes back. A
+  changed port alone does not raise it: the stored URL is followed to its hostname's current
+  port.
 
 ## Health Checks
 
@@ -142,10 +152,9 @@ nothing).
 Strategy: whole-volume snapshot (`sdk.Backups.ofVolumes('main')`). StartOS always stops the
 service (including the `postgres` sidecar) before backing up, so the PostgreSQL data directory is
 copied in a consistent, cold state — this is a plain filesystem backup of Postgres's own files,
-not a `pg_dump`. A restored instance comes back stopped with its database and credentials intact. Its
-interface is assigned a new port on reinstall, so the stored primary URL no longer matches and
-the **Primary URL is no longer available** task holds the service until **Set Primary URL** is
-run again.
+not a `pg_dump`. A restored instance comes back stopped with its database, credentials and primary URL intact;
+if the interface's port changed on reinstall, the primary URL follows its hostname to the new
+port.
 
 ## Limitations and Differences
 

@@ -17,11 +17,11 @@ const dict = {
   'Use these credentials to sign in.': 10,
   Username: 11,
   Password: 12,
-  // actions/setPrimaryUrl.ts
+  // primaryUrl.ts
   'Set Primary URL': 13,
-  'Choose which of your Miniflux addresses is used for BASE_URL — the link Miniflux stamps into feed entries, WebSub callbacks, and OAuth2 redirects.': 14,
+  'Choose the URL Miniflux uses in the links it builds to itself, such as links in Telegram and ntfy notifications and feed icons sent to reader apps. Passkeys work only at this address, so after a change they must be registered again.': 14,
   URL: 15,
-  // init/taskSetPrimaryUrl.ts
+  // init/primaryUrl.ts
   'Primary URL is no longer available. Select a new one.': 16,
   // init/watchAdminPassword.ts
   'Set the admin password before signing in to Miniflux': 17,

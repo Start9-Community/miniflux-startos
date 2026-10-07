@@ -18,7 +18,10 @@ Freshly scaffolded? Work the
 guide page, not a file in this repo — read it, don't copy it in.
 
 Keep `README.md` (technical reference for an AI support or administering agent) and
-`instructions.md` (end-user docs) in sync with your changes.
+`instructions.md` (end-user docs) in sync with your changes. This file restates neither:
+whoever changes the package has both, so it carries only what they don't — repo mechanics,
+a change that looks right and is not, where the next thing gets added, a naming trap, a
+build or test invocation particular to this repo.
 
 **Fix a defect you spot rather than reporting it** — you have the package open and the
 context to be sure. File **a GitHub issue on this repo** only when the call isn't yours to
@@ -31,12 +34,8 @@ verified, tried, and decided belongs in the commit message and the PR body.
 
 ## This repo
 
-- **The admin password is applied by the `admin-password` oneshot in `main.ts`, not by the
-  action.** Miniflux's `CREATE_ADMIN` only creates a missing account, its `-reset-password` needs
-  an interactive terminal, and its REST API needs the current password — so the store's password
-  is written into the `users` table (pgcrypto bcrypt, via `psql` in the `postgres` subcontainer)
-  after Miniflux is healthy on every start. Keep the action a store write; don't route rotation
-  through the API.
-- The `miniflux` and `postgres` subcontainers share this package's loopback network namespace —
-  `main.ts` reaches Postgres over `127.0.0.1`, never a bridge address.
+- **Keep Set Admin Password a store write; the `admin-password` oneshot in `main.ts` applies it.**
+  Don't route rotation through Miniflux's REST API, which needs the current password.
+- Reach Postgres over `127.0.0.1`, never a bridge address: both subcontainers share this
+  package's network namespace.
 - See `UPDATING.md` before bumping the upstream image tag.

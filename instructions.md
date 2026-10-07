@@ -30,7 +30,7 @@ live here. It's also where you create additional (non-admin) user accounts, if y
 - **Set Admin Password** — generates a new admin password and shows it to you. Run it any time
   you've lost your password or want to rotate it. Change the password here rather than in
   Miniflux's own settings: the one set here is put back whenever the service starts.
-- **Set Primary URL** — choose which of this service's reachable addresses Miniflux uses when it
-  needs to build a link back to itself (for example, in the links it writes into feed entries).
-  If you're not using any integrations that rely on links back to your Miniflux instance, you can
-  leave this at its default.
+- **Set Primary URL** — choose which of this service's addresses Miniflux uses when it builds a
+  link back to itself, for example in Telegram or ntfy notifications. Passkeys work only at this
+  address: if you change it, register your passkeys again. **Open UI** opens Miniflux at this
+  address.
