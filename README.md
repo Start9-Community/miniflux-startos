@@ -85,7 +85,7 @@ None. PostgreSQL runs as an in-package sidecar, not a StartOS-level dependency.
 | ------------ | ---- | --------------- | -------- | ------------------------------------------------------------------------------ |
 | `ui`         | `ui` | 8080            | http     | The Miniflux web app and its REST API (same origin, no separate API interface) |
 
-The `ui` interface nominates the primary URL (below) as the address StartOS's **Open UI** opens.
+The `ui` interface nominates the primary URL (below) for StartOS's **Open UI**, which prefers it when StartOS considers it reachable from the current session; an onion origin, for example, is used only from a Tor session.
 
 ## Installation and First-Run Flow
 
