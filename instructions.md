@@ -33,4 +33,4 @@ live here. It's also where you create additional (non-admin) user accounts, if y
 - **Set Primary URL** — choose which of this service's addresses Miniflux uses when it builds a
   link back to itself, for example in Telegram or ntfy notifications. Passkeys work only at this
   address: if you change it, register your passkeys again. **Open UI** opens Miniflux at this
-  address.
+  address when your connection can reach it.
