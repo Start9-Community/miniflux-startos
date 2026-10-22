@@ -22,7 +22,9 @@ export const current = VersionInfo.of({
 **Fixes**
 
 - Proxies set through HTTP_PROXY and HTTPS_PROXY work again, including across redirects
-- Fixed several crashes when adding feeds or sending bad requests`,
+- Fixed several crashes when adding feeds or sending bad requests
+
+[Full upstream release notes](https://github.com/miniflux/v2/releases/tag/2.3.4)`,
     es_ES: `Miniflux actualizado a 2.3.4.
 
 **Novedades**
@@ -42,7 +44,9 @@ export const current = VersionInfo.of({
 **Correcciones**
 
 - Los proxies definidos con HTTP_PROXY y HTTPS_PROXY vuelven a funcionar, también tras redirecciones
-- Se corrigieron varios fallos al añadir feeds o recibir solicitudes incorrectas`,
+- Se corrigieron varios fallos al añadir feeds o recibir solicitudes incorrectas
+
+[Notas completas de la versión original](https://github.com/miniflux/v2/releases/tag/2.3.4)`,
     de_DE: `Miniflux auf 2.3.4 aktualisiert.
 
 **Neuerungen**
@@ -62,7 +66,9 @@ export const current = VersionInfo.of({
 **Korrekturen**
 
 - Über HTTP_PROXY und HTTPS_PROXY gesetzte Proxys funktionieren wieder, auch bei Weiterleitungen
-- Mehrere Abstürze beim Hinzufügen von Feeds oder bei fehlerhaften Anfragen behoben`,
+- Mehrere Abstürze beim Hinzufügen von Feeds oder bei fehlerhaften Anfragen behoben
+
+[Vollständige Upstream-Versionshinweise](https://github.com/miniflux/v2/releases/tag/2.3.4)`,
     pl_PL: `Zaktualizowano Miniflux do 2.3.4.
 
 **Nowości**
@@ -82,7 +88,9 @@ export const current = VersionInfo.of({
 **Poprawki**
 
 - Proxy ustawione przez HTTP_PROXY i HTTPS_PROXY znów działają, także przy przekierowaniach
-- Naprawiono kilka awarii przy dodawaniu kanałów lub nieprawidłowych żądaniach`,
+- Naprawiono kilka awarii przy dodawaniu kanałów lub nieprawidłowych żądaniach
+
+[Pełne informacje o wydaniu upstream](https://github.com/miniflux/v2/releases/tag/2.3.4)`,
     fr_FR: `Miniflux mis à jour vers 2.3.4.
 
 **Nouveautés**
@@ -102,7 +110,9 @@ export const current = VersionInfo.of({
 **Corrections**
 
 - Les proxys définis via HTTP_PROXY et HTTPS_PROXY refonctionnent, y compris après redirections
-- Correction de plusieurs plantages lors de l’ajout de flux ou de requêtes invalides`,
+- Correction de plusieurs plantages lors de l’ajout de flux ou de requêtes invalides
+
+[Notes de version complètes du projet amont](https://github.com/miniflux/v2/releases/tag/2.3.4)`,
   },
   migrations: {
     up: async ({ effects }) => {},
