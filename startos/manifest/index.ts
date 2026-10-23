@@ -14,7 +14,7 @@ export const manifest = setupManifest({
   images: {
     miniflux: {
       source: {
-        dockerBuild: { buildArgs: { IMAGE: 'miniflux/miniflux:2.3.3' } },
+        dockerBuild: { buildArgs: { IMAGE: 'miniflux/miniflux:2.3.4' } },
       },
       arch: ['x86_64', 'aarch64'],
     },
