@@ -8,7 +8,7 @@ schedule, checking Docker Hub for the architectures it ships (`x86_64`, `aarch64
 ## Determining the upstream version
 
 - Latest release: `gh release view -R miniflux/v2 --json tagName -q .tagName` (tags have no `v`
-  prefix, e.g. `2.3.3`).
+  prefix, e.g. `2.3.5`).
 - Confirm the tag is published as a multi-arch image on Docker Hub before pinning it:
   `curl -s https://hub.docker.com/v2/repositories/miniflux/miniflux/tags/<tag> | jq '.images[].architecture'`
   — must include both `amd64` and `arm64`.

@@ -13,9 +13,7 @@ export const manifest = setupManifest({
   volumes: ['main'],
   images: {
     miniflux: {
-      source: {
-        dockerBuild: { buildArgs: { IMAGE: 'miniflux/miniflux:2.3.4' } },
-      },
+      source: { dockerTag: 'miniflux/miniflux:2.3.5' },
       arch: ['x86_64', 'aarch64'],
     },
     postgres: {

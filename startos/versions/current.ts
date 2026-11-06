@@ -1,108 +1,143 @@
 import { IMPOSSIBLE, VersionInfo } from '@start9labs/start-sdk'
 
 export const current = VersionInfo.of({
-  version: '2.3.4:0',
+  version: '2.3.5:0',
   releaseNotes: {
-    en_US: `Updated Miniflux to 2.3.4.
+    en_US: `Updated Miniflux to 2.3.5.
 
 **Features**
 
-- Gotify push notification support
-- Steam scraper rules
-- Helpful messages when saving invalid rewrite rules
-- Lower database storage and memory use
+- OpenID Connect admin role mapping through OAUTH2_ADMIN_GROUP and OAUTH2_GROUP_CLAIM
+- Passkeys can be the only login method when local authentication is disabled
+- Username, password, account linking and passkey settings moved to a new Authentication page
+- Invalid CSS selectors are rejected when saving rewrite and scraper rules
+- Fewer unused sessions stored in the database
 
 **Security**
 
-- Reserved IP address ranges are blocked to further protect against server-side request forgery
-- Hardened passkey redirects, embedded iframes and Google Reader sign-in
-- Feeds can no longer use a proxy on a private address unless FETCHER_ALLOW_PRIVATE_FEED_PROXY=1 is set
-- Stops trusting certificates from a compromised certificate authority (eMudhra)
+- The current password is required to set a new one, and other sessions are signed out when it changes
+- Administrators can no longer edit their own account from the user management page
+- Feed cookies are only sent to the feed's own website
+- Closed another server-side request forgery bypass (6to4 and IPv4-compatible IPv6 addresses)
+- Client IPs can no longer be spoofed through X-Forwarded-For
+- Shared entry pages are no longer cached publicly
 
 **Fixes**
 
-- Proxies set through HTTP_PROXY and HTTPS_PROXY work again, including across redirects
-- Fixed several crashes when adding feeds or sending bad requests`,
-    es_ES: `Miniflux actualizado a 2.3.4.
+- Fever API: starring, mark-as-read and item requests now behave correctly
+- Fixed a Google Reader API crash and case-sensitive category matching
+- JSON feeds with a byte order mark and lower-case RFC 3339 dates are accepted
+- Fixed raw translation keys showing in some messages
+
+The Miniflux image now ships an up-to-date certificate store, so the package no longer rebuilds it.`,
+    es_ES: `Miniflux actualizado a 2.3.5.
 
 **Novedades**
 
-- Compatibilidad con notificaciones push de Gotify
-- Reglas de extracción para Steam
-- Mensajes útiles al guardar reglas de reescritura no válidas
-- Menor uso de almacenamiento y memoria
+- Asignación del rol de administrador mediante OpenID Connect con OAUTH2_ADMIN_GROUP y OAUTH2_GROUP_CLAIM
+- Las passkeys pueden ser el único método de inicio de sesión cuando la autenticación local está desactivada
+- Los ajustes de usuario, contraseña, vinculación de cuentas y passkeys pasan a una nueva página de Autenticación
+- Se rechazan los selectores CSS no válidos al guardar reglas de reescritura y de extracción
+- Menos sesiones sin uso almacenadas en la base de datos
 
 **Seguridad**
 
-- Se bloquean los rangos de direcciones IP reservadas para reforzar la protección contra la falsificación de solicitudes del lado del servidor
-- Mayor protección en las redirecciones de passkeys, los iframes incrustados y el inicio de sesión de Google Reader
-- Los feeds ya no pueden usar un proxy en una dirección privada salvo que se defina FETCHER_ALLOW_PRIVATE_FEED_PROXY=1
-- Deja de confiar en los certificados de una autoridad de certificación comprometida (eMudhra)
+- Se exige la contraseña actual para establecer una nueva y se cierran las demás sesiones al cambiarla
+- Los administradores ya no pueden editar su propia cuenta desde la página de gestión de usuarios
+- Las cookies de los feeds solo se envían al sitio web del propio feed
+- Se cerró otra forma de eludir la protección contra la falsificación de solicitudes del lado del servidor (direcciones 6to4 e IPv6 compatibles con IPv4)
+- Ya no se puede falsificar la IP del cliente mediante X-Forwarded-For
+- Las páginas de entradas compartidas ya no se almacenan en cachés públicas
 
 **Correcciones**
 
-- Los proxies definidos con HTTP_PROXY y HTTPS_PROXY vuelven a funcionar, también tras redirecciones
-- Se corrigieron varios fallos al añadir feeds o recibir solicitudes incorrectas`,
-    de_DE: `Miniflux auf 2.3.4 aktualisiert.
+- API Fever: marcar con estrella, marcar como leído y solicitar elementos ahora funcionan correctamente
+- Se corrigió un fallo de la API de Google Reader y la comparación de categorías sensible a mayúsculas
+- Se aceptan feeds JSON con marca de orden de bytes y fechas RFC 3339 en minúsculas
+- Se corrigieron claves de traducción sin traducir en algunos mensajes
+
+La imagen de Miniflux ya incluye un almacén de certificados actualizado, por lo que el paquete ya no lo reconstruye.`,
+    de_DE: `Miniflux auf 2.3.5 aktualisiert.
 
 **Neuerungen**
 
-- Unterstützung für Gotify-Push-Benachrichtigungen
-- Scraper-Regeln für Steam
-- Hilfreiche Meldungen beim Speichern ungültiger Umschreibregeln
-- Geringerer Speicher- und Arbeitsspeicherverbrauch
+- Zuordnung der Administratorrolle über OpenID Connect mit OAUTH2_ADMIN_GROUP und OAUTH2_GROUP_CLAIM
+- Passkeys können die einzige Anmeldemethode sein, wenn die lokale Authentifizierung deaktiviert ist
+- Einstellungen für Benutzername, Passwort, Kontoverknüpfung und Passkeys auf einer neuen Seite „Authentifizierung“
+- Ungültige CSS-Selektoren werden beim Speichern von Umschreib- und Scraper-Regeln abgelehnt
+- Weniger ungenutzte Sitzungen in der Datenbank
 
 **Sicherheit**
 
-- Reservierte IP-Adressbereiche werden blockiert, um besser vor Server-Side-Request-Forgery zu schützen
-- Gehärtete Passkey-Weiterleitungen, eingebettete iframes und Google-Reader-Anmeldung
-- Feeds können keinen Proxy mit privater Adresse mehr nutzen, außer FETCHER_ALLOW_PRIVATE_FEED_PROXY=1 ist gesetzt
-- Vertraut Zertifikaten einer kompromittierten Zertifizierungsstelle (eMudhra) nicht mehr
+- Zum Festlegen eines neuen Passworts ist das aktuelle erforderlich, und andere Sitzungen werden abgemeldet
+- Administratoren können ihr eigenes Konto nicht mehr über die Benutzerverwaltung bearbeiten
+- Feed-Cookies werden nur noch an die Website des Feeds gesendet
+- Eine weitere Umgehung des Schutzes vor Server-Side-Request-Forgery wurde geschlossen (6to4- und IPv4-kompatible IPv6-Adressen)
+- Die Client-IP lässt sich nicht mehr über X-Forwarded-For fälschen
+- Geteilte Eintragsseiten werden nicht mehr in öffentlichen Caches gespeichert
 
 **Korrekturen**
 
-- Über HTTP_PROXY und HTTPS_PROXY gesetzte Proxys funktionieren wieder, auch bei Weiterleitungen
-- Mehrere Abstürze beim Hinzufügen von Feeds oder bei fehlerhaften Anfragen behoben`,
-    pl_PL: `Zaktualizowano Miniflux do 2.3.4.
+- Fever-API: Markieren, Als-gelesen-Markieren und Abrufen von Einträgen funktionieren jetzt korrekt
+- Ein Absturz der Google-Reader-API und die Groß-/Kleinschreibung bei Kategorien wurden behoben
+- JSON-Feeds mit Byte-Order-Mark und RFC-3339-Daten in Kleinbuchstaben werden akzeptiert
+- Rohe Übersetzungsschlüssel in einigen Meldungen behoben
+
+Das Miniflux-Image enthält jetzt einen aktuellen Zertifikatsspeicher, das Paket baut ihn daher nicht mehr neu.`,
+    pl_PL: `Zaktualizowano Miniflux do 2.3.5.
 
 **Nowości**
 
-- Obsługa powiadomień push Gotify
-- Reguły scrapera dla Steam
-- Pomocne komunikaty przy zapisywaniu nieprawidłowych reguł przepisywania
-- Mniejsze zużycie miejsca w bazie danych i pamięci
+- Przypisywanie roli administratora przez OpenID Connect za pomocą OAUTH2_ADMIN_GROUP i OAUTH2_GROUP_CLAIM
+- Klucze dostępu mogą być jedyną metodą logowania, gdy uwierzytelnianie lokalne jest wyłączone
+- Ustawienia nazwy użytkownika, hasła, łączenia kont i kluczy dostępu przeniesiono na nową stronę Uwierzytelnianie
+- Nieprawidłowe selektory CSS są odrzucane przy zapisywaniu reguł przepisywania i scrapera
+- Mniej nieużywanych sesji w bazie danych
 
 **Bezpieczeństwo**
 
-- Zarezerwowane zakresy adresów IP są blokowane, aby lepiej chronić przed fałszowaniem żądań po stronie serwera
-- Wzmocnione przekierowania kluczy dostępu, osadzone elementy iframe i logowanie Google Reader
-- Kanały nie mogą już używać proxy pod adresem prywatnym, chyba że ustawiono FETCHER_ALLOW_PRIVATE_FEED_PROXY=1
-- Przestaje ufać certyfikatom przejętego urzędu certyfikacji (eMudhra)
+- Ustawienie nowego hasła wymaga podania obecnego, a pozostałe sesje są wylogowywane po jego zmianie
+- Administratorzy nie mogą już edytować własnego konta na stronie zarządzania użytkownikami
+- Pliki cookie kanałów są wysyłane tylko do witryny danego kanału
+- Zamknięto kolejny sposób obejścia ochrony przed fałszowaniem żądań po stronie serwera (adresy 6to4 i IPv6 zgodne z IPv4)
+- Adresu IP klienta nie można już podrobić przez X-Forwarded-For
+- Udostępnione strony wpisów nie są już zapisywane w publicznych pamięciach podręcznych
 
 **Poprawki**
 
-- Proxy ustawione przez HTTP_PROXY i HTTPS_PROXY znów działają, także przy przekierowaniach
-- Naprawiono kilka awarii przy dodawaniu kanałów lub nieprawidłowych żądaniach`,
-    fr_FR: `Miniflux mis à jour vers 2.3.4.
+- API Fever: oznaczanie gwiazdką, oznaczanie jako przeczytane i pobieranie elementów działają poprawnie
+- Naprawiono awarię API Google Reader i rozróżnianie wielkości liter w kategoriach
+- Akceptowane są kanały JSON z BOM oraz daty RFC 3339 pisane małymi literami
+- Naprawiono surowe klucze tłumaczeń w niektórych komunikatach
+
+Obraz Miniflux zawiera teraz aktualny magazyn certyfikatów, więc pakiet nie przebudowuje go już samodzielnie.`,
+    fr_FR: `Miniflux mis à jour vers 2.3.5.
 
 **Nouveautés**
 
-- Prise en charge des notifications push Gotify
-- Règles d’extraction pour Steam
-- Messages utiles lors de l’enregistrement de règles de réécriture invalides
-- Moindre utilisation du stockage et de la mémoire
+- Attribution du rôle d’administrateur via OpenID Connect avec OAUTH2_ADMIN_GROUP et OAUTH2_GROUP_CLAIM
+- Les clés d’accès peuvent être la seule méthode de connexion lorsque l’authentification locale est désactivée
+- Les paramètres du nom d’utilisateur, du mot de passe, de la liaison de comptes et des clés d’accès passent sur une nouvelle page Authentification
+- Les sélecteurs CSS invalides sont rejetés lors de l’enregistrement des règles de réécriture et d’extraction
+- Moins de sessions inutilisées dans la base de données
 
 **Sécurité**
 
-- Les plages d’adresses IP réservées sont bloquées pour mieux se protéger contre la falsification de requêtes côté serveur
-- Redirections des clés d’accès, iframes intégrées et connexion Google Reader renforcées
-- Les flux ne peuvent plus utiliser un proxy à adresse privée sauf si FETCHER_ALLOW_PRIVATE_FEED_PROXY=1 est défini
-- Ne fait plus confiance aux certificats d’une autorité de certification compromise (eMudhra)
+- Le mot de passe actuel est requis pour en définir un nouveau, et les autres sessions sont déconnectées lors du changement
+- Les administrateurs ne peuvent plus modifier leur propre compte depuis la page de gestion des utilisateurs
+- Les cookies des flux ne sont envoyés qu’au site web du flux
+- Un autre contournement de la protection contre la falsification de requêtes côté serveur a été corrigé (adresses 6to4 et IPv6 compatibles IPv4)
+- L’adresse IP du client ne peut plus être usurpée via X-Forwarded-For
+- Les pages d’articles partagées ne sont plus mises en cache publiquement
 
 **Corrections**
 
-- Les proxys définis via HTTP_PROXY et HTTPS_PROXY refonctionnent, y compris après redirections
-- Correction de plusieurs plantages lors de l’ajout de flux ou de requêtes invalides`,
+- API Fever : le marquage en favori, le marquage comme lu et la récupération des éléments fonctionnent correctement
+- Correction d’un plantage de l’API Google Reader et de la casse des catégories
+- Les flux JSON avec marque d’ordre d’octets et les dates RFC 3339 en minuscules sont acceptés
+- Correction de clés de traduction brutes affichées dans certains messages
+
+L’image Miniflux inclut désormais un magasin de certificats à jour ; le paquet ne le reconstruit plus.`,
   },
   migrations: {
     up: async ({ effects }) => {},

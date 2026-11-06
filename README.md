@@ -34,15 +34,13 @@ PostgreSQL sidecar and wires its admin account and public address into StartOS. 
 
 ## Image and Container Runtime
 
-Two subcontainers make up this package, both upstream images run with their own
-entrypoints (`sdk.useEntrypoint()`). The `miniflux` image is built through the root
-`Dockerfile`, a temporary layer that upgrades its CA store and comes out once upstream ships
-an image built on a fixed store; `postgres` is unmodified.
+Two subcontainers make up this package, both unmodified upstream images run with their own
+entrypoints (`sdk.useEntrypoint()`).
 
 | Subcontainer | Image                              | Purpose                                                  |
 | ------------ | ---------------------------------- | -------------------------------------------------------- |
 | `postgres`   | Official `postgres` image          | Database backing Miniflux's feeds, entries, and accounts |
-| `miniflux`   | `miniflux/miniflux` + `Dockerfile` | The Miniflux application itself                          |
+| `miniflux`   | Official `miniflux/miniflux` image | The Miniflux application itself                          |
 
 Architectures: x86_64, aarch64. `postgres` binds to `127.0.0.1` only and is never exposed via any
 interface — `miniflux` reaches it over loopback, since both subcontainers share this package's
